@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>El Grimorio del Vórtice | Edición Neón</title>
+<style>
+  :root {
+    --bg: #05070f;
+    --panel: rgba(10, 15, 32, 0.88);
+    --cyan: #00f0ff;
+    --violet: #9d4edd;
+    --fire: #ff5400;
+    --ice: #48cae4;
+    --pink: #ff2a85;
+    --gold: #ffd166;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* MENÚ INICIAL */
+  #start-screen {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at center, #111b3a 0%, #04060c 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 50; text-align: center; padding: 20px;
+  }
+
+  h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(2.1rem, 5vw, 4rem);
+    background: linear-gradient(90deg, #00f0ff, #ffffff, #9d4edd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(0, 240, 255, 0.45);
+    margin-bottom: 10px;
+  }
+
+  .subtitle { color: #94a3b8; font-size: 1.15rem; margin-bottom: 28px; max-width: 650px; }
+
+  .play-btn {
+    padding: 16px 38px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #05070f;
+    background: var(--cyan);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 25px var(--cyan);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .play-btn:hover { transform: scale(1.06); box-shadow: 0 0 40px var(--cyan); }
+
+  .controls-hint {
+    margin-top: 25px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(0,240,255,0.2);
+    padding: 14px 22px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+  }
+
+  /* HUD SUPERIOR */
+  #hud {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 14px 24px; pointer-events: none; z-index: 20;
+  }
+
+  .bars-box {
+    width: 260px;
+    background: var(--panel);
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  }
+
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-lbl { width: 58px; font-weight: 700; font-size: 0.9rem; letter-spacing: 1px; }
+  .bar-track {
+    flex: 1; height: 13px; background: rgba(255,255,255,0.08);
+    border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.15);
+  }
+  .bar-fill { height: 100%; transition: width 0.12s ease-out; }
+  #hp-fill { background: linear-gradient(90deg, #ff2a85, #ff758f); width: 100%; box-shadow: 0 0 12px #ff2a85; }
+  #mana-fill { background: linear-gradient(90deg, #7209b7, #00f0ff); width: 30%; box-shadow: 0 0 12px #00f0ff; }
+
+  /* MARCADOR GIGANTE DE OLEADA */
+  #wave-display {
+    text-align: center;
+    background: var(--panel);
+    padding: 10px 36px 14px;
+    border-radius: 18px;
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 30px rgba(255, 209, 102, 0.35);
+  }
+  #wave-num {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-shadow: 0 0 18px rgba(255, 209, 102, 0.8);
+    line-height: 1.1;
+  }
+  .wave-progress-wrap {
+    width: 220px; height: 8px; background: rgba(255,255,255,0.1);
+    border-radius: 4px; margin: 6px auto 0; overflow: hidden;
+  }
+  #wave-progress-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--gold), #fff);
+    box-shadow: 0 0 10px var(--gold);
+    transition: width 0.2s;
+  }
+
+  /* DOCK INFERIOR DE HECHIZOS */
+  #spell-bar {
+    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; z-index: 25; flex-wrap: wrap; justify-content: center;
+    background: var(--panel); padding: 10px 16px; border-radius: 16px;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    backdrop-filter: blur(8px);
+  }
+
+  .spell-btn {
+    padding: 8px 14px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.03);
+    color: #fff; cursor: pointer; text-align: center;
+    transition: all 0.2s; min-width: 115px;
+  }
+  .spell-btn.active {
+    border-color: var(--cyan);
+    background: rgba(0, 240, 255, 0.18);
+    transform: translateY(-4px);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+  }
+  .spell-btn .icon { font-size: 1.35rem; display: block; }
+  .spell-btn .name { font-weight: 700; font-size: 0.9rem; display: block; }
+  .spell-btn .cost { font-size: 0.78rem; color: #94a3b8; }
+
+  #ult-btn {
+    border-color: var(--cyan);
+    background: linear-gradient(135deg, rgba(0,240,255,0.2), rgba(157,78,221,0.2));
+  }
+  #ult-btn.ready {
+    animation: ultGlow 1s infinite alternate;
+    border-width: 2px;
+  }
+  @keyframes ultGlow {
+    from { box-shadow: 0 0 12px #00f0ff; transform: scale(1); }
+    to { box-shadow: 0 0 32px #00f0ff, 0 0 12px #fff; transform: scale(1.06); }
+  }
+
+  canvas { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+
+  <!-- PANTALLA DE INICIO -->
+  <div id="start-screen">
+    <h1>🔮 EL GRIMORIO DEL VÓRTICE</h1>
+    <p class="subtitle">Defiende el santuario combinando disparos cinéticos y runas geométricas sintetizadas</p>
+    <button class="play-btn" onclick="startGame()">⚔ INICIAR BATALLA</button>
+    <div class="controls-hint">
+      <b>Moverse:</b> W A S D o Flechas &nbsp;|&nbsp; <b>Disparar (Genera Maná):</b> Clic Izquierdo<br>
+      <b>Lanzar Hechizo Geométrico:</b> Dibuja un Círculo, Triángulo o Línea/Cuadrado con Clic Derecho (o dedo) o usa teclas 1-3<br>
+      <b>Definitiva (100% Maná):</b> Tecla <b>ESPACIO</b>, botón celestial o dibuja un corazón/estrella grande
+    </div>
+  </div>
+
+  <!-- HUD SUPERIOR -->
+  <div id="hud" style="display:none;">
+    <div class="bars-box">
+      <div class="bar-row">
+        <span class="bar-lbl" style="color:#ff758f;">VIDA</span>
+        <div class="bar-track"><div id="hp-fill" class="bar-fill"></div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-lbl" style="color:#00f0ff;">MANÁ</span>
+        <div class="bar-track"><div id="mana-fill" class="bar-fill"></div></div>
+      </div>
+    </div>
+
+    <div id="wave-display">
+      <div id="wave-num">OLEADA 1</div>
+      <div class="wave-progress-wrap"><div id="wave-progress-bar"></div></div>
+    </div>
+
+    <div class="bars-box" style="width:auto; pointer-events:auto;">
+      <button onclick="resetGame()" style="background:none; border:1px solid #00f0ff; color:#00f0ff; padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:700;">
+        🔄 REINICIAR
+      </button>
+    </div>
+  </div>
+
+  <!-- BARRA DE HECHIZOS -->
+  <div id="spell-bar" style="display:none;">
+    <div class="spell-btn active" data-spell="CIRCLE" onclick="selectSpell('CIRCLE')">
+      <span class="icon" style="color:#9d4edd;">◯</span>
+      <span class="name">Vórtice Gravitacional</span>
+      <span class="cost">25 Maná • Tecla 1</span>
+    </div>
+    <div class="spell-btn" data-spell="TRIANGLE" onclick="selectSpell('TRIANGLE')">
+      <span class="icon" style="color:#ff5400;">△</span>
+      <span class="name">Trampa Ígnea</span>
+      <span class="cost">30 Maná • Tecla 2</span>
+    </div>
+    <div class="spell-btn" data-spell="SQUARE" onclick="selectSpell('SQUARE')">
+      <span class="icon" style="color:#48cae4;">▭</span>
+      <span class="name">Matriz Criogénica</span>
+      <span class="cost">25 Maná • Tecla 3</span>
+    </div>
+    <div class="spell-btn" id="ult-btn" onclick="triggerUltimate()">
+      <span class="icon">🩵✨</span>
+      <span class="name">Te amo Monserrat Levipan</span>
+      <span class="cost">100% Maná • ESPACIO</span>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ================= AUDIO SINTETIZADO (WEB AUDIO API) =================
+const Sound = {
+  ctx: null,
+  init() {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  play(freq, type, dur, vol = 0.15, endFreq = null) {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+    if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, this.ctx.currentTime + dur);
+    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + dur);
+  },
+  shoot() { this.play(580, 'triangle', 0.08, 0.08, 190); },
+  enemyShoot() { this.play(260, 'sawtooth', 0.14, 0.07, 110); },
+  hit() { this.play(150, 'sawtooth', 0.07, 0.08, 60); },
+  shieldBlock() { this.play(760, 'sine', 0.18, 0.15, 380); },
+  shieldBreak() { this.play(280, 'sawtooth', 0.45, 0.22, 45); },
+  vortex() {
+    this.play(110, 'sawtooth', 0.75, 0.2, 42);
+    this.play(75, 'sine', 0.85, 0.25, 35);
+  },
+  fireTrap() {
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => this.play(180 + Math.random() * 240, 'sawtooth', 0.12, 0.14, 55), i * 55);
+    }
+  },
+  cryoMatrix() {
+    this.play(1320, 'sine', 0.35, 0.15, 1980);
+    setTimeout(() => this.play(1760, 'triangle', 0.4, 0.12, 2400), 70);
+  },
+  ultimate() {
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+    notes.forEach((n, idx) => {
+      setTimeout(() => this.play(n, 'sine', 1.1, 0.2, n * 1.25), idx * 55);
+    });
+    this.play(95, 'sawtooth', 0.9, 0.28, 30);
+  }
+};
+
+// ================= ESTADO GLOBAL =================
+let running = false;
+let wave = 1;
+let waveTotalEnemies = 0;
+let waveKilledEnemies = 0;
+let screenShake = 0;
+let activeSpell = 'CIRCLE';
+
+const SPELL_DATA = {
+  CIRCLE:   { cost: 25, color: '#9d4edd', radius: 130, duration: 240 },
+  TRIANGLE: { cost: 30, color: '#ff5400', radius: 135, duration: 180 },
+  SQUARE:   { cost: 25, color: '#48cae4', radius: 130, duration: 220 }
+};
+
+const player = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  radius: 18,
+  speed: 4.5,
+  hp: 100,
+  maxHp: 100,
+  shield: 5,
+  maxShield: 5,
+  mana: 30,
+  maxMana: 100,
+  cooldown: 0,
+  invuln: 0
+};
+
+let bullets = [];
+let enemyBullets = [];
+let enemies = [];
+let zones = [];
+let particles = [];
+let floatingTexts = [];
+let strokePoints = [];
+let isDrawing = false;
+
+let loveMessageTimer = 0;
+let cyanFlash = 0;
+
+// Controles
+const keys = {};
+const pointer = { x: canvas.width / 2, y: canvas.height / 2, leftDown: false };
+
+window.addEventListener('keydown', e => {
+  keys[e.key.toLowerCase()] = true;
+  if (e.key === '1') selectSpell('CIRCLE');
+  if (e.key === '2') selectSpell('TRIANGLE');
+  if (e.key === '3') selectSpell('SQUARE');
+  if (e.code === 'Space') {
+    e.preventDefault();
+    triggerUltimate();
+  }
+});
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+canvas.addEventListener('mousemove', e => {
+  pointer.x = e.clientX;
+  pointer.y = e.clientY;
+  if (isDrawing && running) strokePoints.push({ x: e.clientX, y: e.clientY });
+});
+
+canvas.addEventListener('mousedown', e => {
+  if (!running) return;
+  Sound.init();
+  if (e.button === 0) pointer.leftDown = true;
+  if (e.button === 2) {
+    isDrawing = true;
+    strokePoints = [{ x: e.clientX, y: e.clientY }];
+  }
+});
+
+canvas.addEventListener('mouseup', e => {
+  if (e.button === 0) pointer.leftDown = false;
+  if (e.button === 2 && isDrawing) {
+    isDrawing = false;
+    resolveDrawing();
+  }
+});
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+// Soporte táctil para dibujar hechizos
+canvas.addEventListener('touchstart', e => {
+  if (!running) return;
+  Sound.init();
+  const t = e.touches[0];
+  isDrawing = true;
+  strokePoints = [{ x: t.clientX, y: t.clientY }];
+}, { passive: true });
+
+canvas.addEventListener('touchmove', e => {
+  if (!running || !isDrawing) return;
+  const t = e.touches[0];
+  strokePoints.push({ x: t.clientX, y: t.clientY });
+}, { passive: true });
+
+canvas.addEventListener('touchend', () => {
+  if (isDrawing) {
+    isDrawing = false;
+    resolveDrawing();
+  }
+});
+
+function selectSpell(name) {
+  activeSpell = name;
+  document.querySelectorAll('.spell-btn').forEach(b => b.classList.remove('active'));
+  const el = document.querySelector(`.spell-btn[data-spell="${name}"]`);
+  if (el) el.classList.add('active');
+}
+
+function startGame() {
+  Sound.init();
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('hud').style.display = 'flex';
+  document.getElementById('spell-bar').style.display = 'flex';
+  resetGame();
+}
+
+function resetGame() {
+  wave = 1;
+  player.x = canvas.width / 2;
+  player.y = canvas.height / 2;
+  player.hp = 100;
+  player.shield = 5;
+  player.mana = 30;
+  bullets = [];
+  enemyBullets = [];
+  enemies = [];
+  zones = [];
+  particles = [];
+  floatingTexts = [];
+  loveMessageTimer = 0;
+  running = true;
+  spawnWave(wave);
+}
+
+// ================= RECONOCIMIENTO DE TRAZO / HECHIZOS =================
+function resolveDrawing() {
+  if (strokePoints.length < 4) {
+    castGeometricSpell(activeSpell, pointer.x, pointer.y);
+    strokePoints = [];
+    return;
+  }
+
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  let sumX = 0, sumY = 0;
+  let pathLen = 0;
+
+  for (let i = 0; i < strokePoints.length; i++) {
+    const p = strokePoints[i];
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.y > maxY) maxY = p.y;
+    sumX += p.x;
+    sumY += p.y;
+    if (i > 0) {
+      pathLen += Math.hypot(p.x - strokePoints[i - 1].x, p.y - strokePoints[i - 1].y);
+    }
+  }
+
+  const cx = sumX / strokePoints.length;
+  const cy = sumY / strokePoints.length;
+  const boxW = maxX - minX;
+  const boxH = maxY - minY;
+  const span = Math.hypot(boxW, boxH);
+  const start = strokePoints[0];
+  const end = strokePoints[strokePoints.length - 1];
+  const directDist = Math.hypot(end.x - start.x, end.y - start.y);
+
+  // Si dibuja un corazón/estrella/trazo amplio con 100% maná -> Definitiva
+  if (pathLen > 450 && player.mana >= 100) {
+    triggerUltimate();
+    strokePoints = [];
+    return;
+  }
+
+  // Línea recta o figura abierta -> Matriz Criogénica
+  const isClosed = directDist < Math.max(60, span * 0.35);
+  if (!isClosed || (pathLen > 40 && directDist / pathLen > 0.85)) {
+    castGeometricSpell('SQUARE', cx, cy);
+    strokePoints = [];
+    return;
+  }
+
+  // Analizar variación de distancia al centro para distinguir Círculo vs Triángulo vs Cuadrado
+  const radii = strokePoints.map(p => Math.hypot(p.x - cx, p.y - cy));
+  const meanR = radii.reduce((a, b) => a + b, 0) / radii.length;
+  const variance = radii.reduce((a, r) => a + Math.pow(r - meanR, 2), 0) / radii.length;
+  const stdRatio = Math.sqrt(variance) / (meanR || 1);
+
+  if (stdRatio < 0.21) {
+    castGeometricSpell('CIRCLE', cx, cy);
+  } else if (stdRatio < 0.35) {
+    castGeometricSpell('TRIANGLE', cx, cy);
+  } else {
+    castGeometricSpell('SQUARE', cx, cy);
+  }
+
+  strokePoints = [];
+}
+
+function castGeometricSpell(type, x, y) {
+  const spec = SPELL_DATA[type];
+  if (player.mana < spec.cost) {
+    addText(x, y, '¡Maná insuficiente!', '#ff2a85');
+    return;
+  }
+
+  player.mana -= spec.cost;
+  screenShake = 10;
+
+  if (type === 'CIRCLE') Sound.vortex();
+  if (type === 'TRIANGLE') Sound.fireTrap();
+  if (type === 'SQUARE') Sound.cryoMatrix();
+
+  zones.push({
+    type, x, y,
+    radius: spec.radius,
+    color: spec.color,
+    timer: spec.duration,
+    maxTimer: spec.duration,
+    rot: 0
+  });
+
+  emitParticles(x, y, spec.color, 26);
+}
+
+// ================= HECHIZO DEFINITIVO: "Te amo Monserrat Levipan" =================
+function triggerUltimate() {
+  if (!running) return;
+  if (player.mana < 100) {
+    addText(player.x, player.y - 35, 'Requiere 100% Maná', '#00f0ff');
+    return;
+  }
+
+  player.mana = 0;
+  Sound.ultimate();
+  screenShake = 32;
+  cyanFlash = 0.92;
+  loveMessageTimer = 280;
+
+  // Onda expansiva celeste ultrarrápida
+  zones.push({
+    type: 'LOVE_NOVA',
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 30,
+    color: '#00f0ff',
+    timer: 50,
+    maxTimer: 50,
+    rot: 0
+  });
+
+  // Aniquilar a todos los enemigos y proyectiles enemigos
+  enemies.forEach(en => {
+    emitParticles(en.x, en.y, '#00f0ff', 28);
+    emitParticles(en.x, en.y, '#ffffff', 12);
+    waveKilledEnemies++;
+  });
+  enemies = [];
+  enemyBullets = [];
+}
+
+// ================= GENERADOR DE OLEADAS Y MONSTRUOS ÚNICOS =================
+function spawnWave(w) {
+  document.getElementById('wave-num').innerText = `OLEADA ${w}`;
+  waveTotalEnemies = 5 + w * 3;
+  waveKilledEnemies = 0;
+
+  const pool = ['SPEEDSTER', 'ARMORED', 'WRAITH', 'ELEMENTAL'];
+
+  for (let i = 0; i < waveTotalEnemies; i++) {
+    const side = Math.floor(Math.random() * 4);
+    let x, y;
+    if (side === 0) { x = Math.random() * canvas.width; y = -35; }
+    else if (side === 1) { x = canvas.width + 35; y = Math.random() * canvas.height; }
+    else if (side === 2) { x = Math.random() * canvas.width; y = canvas.height + 35; }
+    else { x = -35; y = Math.random() * canvas.height; }
+
+    const kind = pool[i % pool.length];
+
+    if (kind === 'SPEEDSTER') {
+      enemies.push({
+        kind, x, y, radius: 15, speed: 2.9 + w * 0.08,
+        hp: 28 + w * 6, maxHp: 28 + w * 6,
+        color: '#ffbe0b', trail: [], freeze: 0, angle: 0
+      });
+    } else if (kind === 'ARMORED') {
+      enemies.push({
+        kind, x, y, radius: 25, speed: 1.05 + w * 0.04,
+        hp: 110 + w * 24, maxHp: 110 + w * 24,
+        color: '#fb5607', trail: [], freeze: 0, angle: 0
+      });
+    } else if (kind === 'WRAITH') {
+      enemies.push({
+        kind, x, y, radius: 17, speed: 2.1 + w * 0.06,
+        hp: 40 + w * 8, maxHp: 40 + w * 8,
+        color: '#ff006e', trail: [], freeze: 0, angle: 0, blinkTimer: 110 + Math.random() * 80
+      });
+    } else {
+      enemies.push({
+        kind: 'ELEMENTAL', x, y, radius: 19, speed: 1.45 + w * 0.04,
+        hp: 50 + w * 10, maxHp: 50 + w * 10,
+        color: '#3a86ff', trail: [], freeze: 0, angle: 0, shootTimer: 120 + Math.random() * 60
+      });
+    }
+  }
+}
+
+function emitParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const spd = 1.5 + Math.random() * 5.5;
+    particles.push({
+      x, y,
+      vx: Math.cos(a) * spd,
+      vy: Math.sin(a) * spd,
+      life: 22 + Math.random() * 24,
+      maxLife: 46,
+      color,
+      size: 2 + Math.random() * 3.8
+    });
+  }
+}
+
+function addText(x, y, text, color) {
+  floatingTexts.push({ x, y, text, color, life: 55 });
+}
+
+// ================= BUCLE DE ACTUALIZACIÓN =================
+function update() {
+  if (!running) return;
+
+  if (screenShake > 0) screenShake--;
+  if (cyanFlash > 0) cyanFlash = Math.max(0, cyanFlash - 0.032);
+  if (loveMessageTimer > 0) loveMessageTimer--;
+  if (player.invuln > 0) player.invuln--;
+
+  // Movimiento Centinela
+  let mx = 0, my = 0;
+  if (keys['w'] || keys['arrowup']) my -= 1;
+  if (keys['s'] || keys['arrowdown']) my += 1;
+  if (keys['a'] || keys['arrowleft']) mx -= 1;
+  if (keys['d'] || keys['arrowright']) mx += 1;
+
+  if (mx !== 0 || my !== 0) {
+    const d = Math.hypot(mx, my);
+    player.x = Math.max(25, Math.min(canvas.width - 25, player.x + (mx / d) * player.speed));
+    player.y = Math.max(70, Math.min(canvas.height - 85, player.y + (my / d) * player.speed));
+  }
+
+  // Disparo Centinela
+  if (player.cooldown > 0) player.cooldown--;
+  if (pointer.leftDown && player.cooldown <= 0) {
+    const ang = Math.atan2(pointer.y - player.y, pointer.x - player.x);
+    bullets.push({
+      x: player.x, y: player.y,
+      vx: Math.cos(ang) * 12,
+      vy: Math.sin(ang) * 12,
+      trail: []
+    });
+    Sound.shoot();
+    player.cooldown = 10;
+  }
+
+  // Balas del jugador
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    b.trail.push({ x: b.x, y: b.y });
+    if (b.trail.length > 7) b.trail.shift();
+
+    b.x += b.vx;
+    b.y += b.vy;
+
+    if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+      bullets.splice(i, 1);
+      continue;
+    }
+
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      const en = enemies[j];
+      if (Math.hypot(b.x - en.x, b.y - en.y) < en.radius + 7) {
+        en.hp -= 20;
+        bullets.splice(i, 1);
+        Sound.hit();
+        screenShake = Math.max(screenShake, 3);
+        emitParticles(b.x, b.y, '#00f0ff', 7);
+
+        // Economía de Maná activa: impactar recarga maná
+        player.mana = Math.min(player.maxMana, player.mana + 5);
+
+        if (en.hp <= 0) {
+          emitParticles(en.x, en.y, en.color, 20);
+          screenShake = Math.max(screenShake, 7);
+          enemies.splice(j, 1);
+          waveKilledEnemies++;
+        }
+        break;
+      }
+    }
+  }
+
+  // Balas de Elementales
+  for (let i = enemyBullets.length - 1; i >= 0; i--) {
+    const eb = enemyBullets[i];
+    eb.x += eb.vx;
+    eb.y += eb.vy;
+    if (eb.x < 0 || eb.x > canvas.width || eb.y < 0 || eb.y > canvas.height) {
+      enemyBullets.splice(i, 1);
+      continue;
+    }
+    if (Math.hypot(eb.x - player.x, eb.y - player.y) < player.radius + 6) {
+      enemyBullets.splice(i, 1);
+      damagePlayer(14);
+    }
+  }
+
+  // Áreas de Hechizos Geométricos
+  for (let i = zones.length - 1; i >= 0; i--) {
+    const z = zones[i];
+    z.timer--;
+    z.rot += 0.03;
+
+    if (z.type === 'LOVE_NOVA') {
+      z.radius += 70;
+    }
+
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      const en = enemies[j];
+      const dist = Math.hypot(en.x - z.x, en.y - z.y);
+      if (dist < z.radius + en.radius) {
+        if (z.type === 'CIRCLE') {
+          const pull = Math.atan2(z.y - en.y, z.x - en.x);
+          en.x += Math.cos(pull) * 3.8;
+          en.y += Math.sin(pull) * 3.8;
+          en.hp -= 0.85;
+        } else if (z.type === 'TRIANGLE') {
+          en.hp -= 1.45;
+          if (Math.random() < 0.25) emitParticles(en.x, en.y, '#ff5400', 2);
+        } else if (z.type === 'SQUARE') {
+          en.freeze = 85;
+          en.hp -= 0.45;
+        }
+
+        if (en.hp <= 0) {
+          emitParticles(en.x, en.y, en.color, 18);
+          enemies.splice(j, 1);
+          waveKilledEnemies++;
+        }
+      }
+    }
+
+    if (z.timer <= 0) zones.splice(i, 1);
+  }
+
+  // Actualizar Monstruos
+  enemies.forEach(en => {
+    en.trail.push({ x: en.x, y: en.y });
+    if (en.trail.length > 6) en.trail.shift();
+
+    if (en.freeze > 0) {
+      en.freeze--;
+      return;
+    }
+
+    const ang = Math.atan2(player.y - en.y, player.x - en.x);
+    en.angle = ang;
+
+    if (en.kind === 'WRAITH') {
+      en.blinkTimer--;
+      if (en.blinkTimer <= 0) {
+        emitParticles(en.x, en.y, en.color, 10);
+        const tpDist = 95;
+        en.x += Math.cos(ang + (Math.random() - 0.5)) * tpDist;
+        en.y += Math.sin(ang + (Math.random() - 0.5)) * tpDist;
+        emitParticles(en.x, en.y, en.color, 10);
+        en.blinkTimer = 140;
+      }
+    } else if (en.kind === 'ELEMENTAL') {
+      en.shootTimer--;
+      if (en.shootTimer <= 0) {
+        enemyBullets.push({
+          x: en.x, y: en.y,
+          vx: Math.cos(ang) * 4.8,
+          vy: Math.sin(ang) * 4.8
+        });
+        Sound.enemyShoot();
+        en.shootTimer = 150;
+      }
+    }
+
+    en.x += Math.cos(ang) * en.speed;
+    en.y += Math.sin(ang) * en.speed;
+
+    if (Math.hypot(en.x - player.x, en.y - player.y) < en.radius + player.radius) {
+      damagePlayer(18);
+    }
+  });
+
+  // Superar Oleada -> Restaura escudo completo
+  if (enemies.length === 0 && running) {
+    wave++;
+    player.shield = player.maxShield;
+    addText(player.x, player.y - 45, `¡OLEADA ${wave}! Escudo Restaurado`, '#ffd166');
+    spawnWave(wave);
+  }
+
+  // Partículas y textos flotantes
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.life--;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    const ft = floatingTexts[i];
+    ft.y -= 0.9; ft.life--;
+    if (ft.life <= 0) floatingTexts.splice(i, 1);
+  }
+
+  updateUI();
+}
+
+function damagePlayer(amount) {
+  if (player.invuln > 0) return;
+  player.invuln = 42;
+  screenShake = 14;
+
+  if (player.shield > 0) {
+    player.shield--;
+    if (player.shield > 0) {
+      Sound.shieldBlock();
+      emitParticles(player.x, player.y, '#00f0ff', 14);
+      addText(player.x, player.y - 30, `Escudo (${player.shield}/5)`, '#00f0ff');
+    } else {
+      Sound.shieldBreak();
+      emitParticles(player.x, player.y, '#ff2a85', 26);
+      addText(player.x, player.y - 30, '¡ESCUDO ROTO!', '#ff2a85');
+    }
+  } else {
+    player.hp -= amount;
+    Sound.hit();
+    emitParticles(player.x, player.y, '#ff2a85', 16);
+    addText(player.x, player.y - 30, `-${amount} VIDA`, '#ff2a85');
+  }
+
+  if (player.hp <= 0) {
+    running = false;
+    alert(`Has caído en la Oleada ${wave}. ¡Pulsa Aceptar para intentarlo de nuevo!`);
+    resetGame();
+  }
+}
+
+function updateUI() {
+  document.getElementById('hp-fill').style.width = `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
+  document.getElementById('mana-fill').style.width = `${(player.mana / player.maxMana) * 100}%`;
+
+  const pct = waveTotalEnemies > 0 ? (waveKilledEnemies / waveTotalEnemies) * 100 : 0;
+  document.getElementById('wave-progress-bar').style.width = `${pct}%`;
+
+  const ultBtn = document.getElementById('ult-btn');
+  if (player.mana >= 100) ultBtn.classList.add('ready');
+  else ultBtn.classList.remove('ready');
+}
+
+// ================= RENDERIZADO NEÓN =================
+function draw() {
+  ctx.save();
+  if (screenShake > 0) {
+    ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake);
+  }
+
+  // Fondo oscuro con rejilla arcana
+  ctx.fillStyle = '#05070f';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.strokeStyle = 'rgba(0, 240, 255, 0.045)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvas.width; x += 64) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+  }
+  for (let y = 0; y < canvas.height; y += 64) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  }
+
+  // Dibujar Áreas de Hechizos Geométricos
+  zones.forEach(z => {
+    const alpha = Math.min(0.38, (z.timer / z.maxTimer) * 0.45);
+    ctx.save();
+    ctx.translate(z.x, z.y);
+    ctx.shadowColor = z.color;
+    ctx.shadowBlur = 22;
+    ctx.strokeStyle = z.color;
+    ctx.fillStyle = z.color + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+    ctx.lineWidth = 3;
+
+    if (z.type === 'CIRCLE' || z.type === 'LOVE_NOVA') {
+      ctx.beginPath();
+      ctx.arc(0, 0, z.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      if (z.type === 'CIRCLE') {
+        ctx.rotate(z.rot);
+        ctx.beginPath();
+        ctx.arc(0, 0, z.radius * 0.55, 0, Math.PI * 1.4);
+        ctx.stroke();
+      }
+    } else if (z.type === 'TRIANGLE') {
+      ctx.rotate(Math.sin(z.rot) * 0.15);
+      ctx.beginPath();
+      for (let i = 0; i < 3; i++) {
+        const a = -Math.PI / 2 + (i * Math.PI * 2) / 3;
+        const px = Math.cos(a) * z.radius;
+        const py = Math.sin(a) * z.radius;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (z.type === 'SQUARE') {
+      ctx.fillRect(-z.radius, -z.radius * 0.65, z.radius * 2, z.radius * 1.3);
+      ctx.strokeRect(-z.radius, -z.radius * 0.65, z.radius * 2, z.radius * 1.3);
+    }
+    ctx.restore();
+  });
+
+  // Trazo en vivo
+  if (strokePoints.length > 1) {
+    ctx.save();
+    ctx.strokeStyle = '#00f0ff';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 16;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    strokePoints.forEach((p, idx) => idx === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Balas con estela dinámica
+  bullets.forEach(b => {
+    b.trail.forEach((t, idx) => {
+      ctx.fillStyle = `rgba(0, 240, 255, ${(idx / b.trail.length) * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 3.5 * (idx / b.trail.length), 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // Balas de Elementales
+  enemyBullets.forEach(eb => {
+    ctx.save();
+    ctx.fillStyle = '#3a86ff';
+    ctx.shadowColor = '#3a86ff';
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.arc(eb.x, eb.y, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // Monstruos Únicos con estela
+  enemies.forEach(en => {
+    const drawColor = en.freeze > 0 ? '#90e0ef' : en.color;
+
+    en.trail.forEach((t, idx) => {
+      ctx.fillStyle = drawColor + Math.floor((idx / en.trail.length) * 45).toString(16).padStart(2, '0');
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, en.radius * 0.65 * (idx / en.trail.length), 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    ctx.save();
+    ctx.translate(en.x, en.y);
+    ctx.rotate(en.angle);
+    ctx.fillStyle = drawColor;
+    ctx.shadowColor = drawColor;
+    ctx.shadowBlur = 16;
+
+    ctx.beginPath();
+    if (en.kind === 'SPEEDSTER') {
+      ctx.moveTo(en.radius * 1.3, 0);
+      ctx.lineTo(-en.radius, -en.radius * 0.9);
+      ctx.lineTo(-en.radius * 0.6, 0);
+      ctx.lineTo(-en.radius, en.radius * 0.9);
+    } else if (en.kind === 'ARMORED') {
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI * 2) / 6;
+        i === 0 ? ctx.moveTo(Math.cos(a) * en.radius, Math.sin(a) * en.radius)
+                : ctx.lineTo(Math.cos(a) * en.radius, Math.sin(a) * en.radius);
+      }
+    } else if (en.kind === 'WRAITH') {
+      ctx.moveTo(en.radius * 1.25, 0);
+      ctx.lineTo(0, -en.radius);
+      ctx.lineTo(-en.radius * 1.25, 0);
+      ctx.lineTo(0, en.radius);
+    } else {
+      ctx.arc(0, 0, en.radius * 0.85, 0, Math.PI * 2);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    const hpRatio = Math.max(0, en.hp / en.maxHp);
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.fillRect(en.x - 16, en.y - en.radius - 11, 32, 4);
+    ctx.fillStyle = drawColor;
+    ctx.fillRect(en.x - 16, en.y - en.radius - 11, 32 * hpRatio, 4);
+  });
+
+  // Centinela + Aura de Escudo + Barra dedicada debajo del jugador
+  ctx.save();
+  ctx.translate(player.x, player.y);
+
+  if (player.shield > 0) {
+    ctx.strokeStyle = '#00f0ff';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 18;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, player.radius + 10, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = '#00f0ff';
+  ctx.shadowBlur = 20;
+  ctx.beginPath();
+  ctx.arc(0, 0, player.radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Barra visual dedicada de Escudo (5 segmentos debajo del jugador)
+  const segW = 9, segGap = 2;
+  const totalShieldW = player.maxShield * segW + (player.maxShield - 1) * segGap;
+  const startShieldX = player.x - totalShieldW / 2;
+  const shieldY = player.y + player.radius + 16;
+
+  for (let s = 0; s < player.maxShield; s++) {
+    ctx.fillStyle = s < player.shield ? '#00f0ff' : 'rgba(255, 255, 255, 0.14)';
+    ctx.shadowColor = s < player.shield ? '#00f0ff' : 'transparent';
+    ctx.shadowBlur = s < player.shield ? 8 : 0;
+    ctx.fillRect(startShieldX + s * (segW + segGap), shieldY, segW, 5);
+  }
+  ctx.shadowBlur = 0;
+
+  // Partículas
+  particles.forEach(p => {
+    ctx.save();
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 10;
+    ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // Textos flotantes
+  floatingTexts.forEach(ft => {
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillStyle = ft.color;
+    ctx.textAlign = 'center';
+    ctx.fillText(ft.text, ft.x, ft.y);
+  });
+
+  // Destello celeste y Mensaje Definitivo en el centro del mapa
+  if (cyanFlash > 0) {
+    ctx.fillStyle = `rgba(0, 240, 255, ${cyanFlash})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  if (loveMessageTimer > 0) {
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, loveMessageTimer / 45);
+    ctx.font = '900 clamp(28px, 5vw, 66px) Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 40;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('🩵 Te amo Monserrat Levipan 🩵', canvas.width / 2, canvas.height / 2);
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#00f0ff';
+    ctx.strokeText('🩵 Te amo Monserrat Levipan 🩵', canvas.width / 2, canvas.height / 2);
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
